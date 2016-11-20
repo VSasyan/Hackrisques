@@ -66,9 +66,40 @@ function generatePosAttribute($stations){
 function getStations($pdo,$lat,$lon,$rayon){
     $result = getStationswithoutWaterInformation($pdo,$lat,$lon,$rayon);
     $result = completeWaterInformation($result);
-    $result = generateStatus($result,0,2);
+    $result = generateStatus($result,1,3);
     $result = generatePosAttribute($result);
     return $result;
 }
-    
+
+
+function getZonesInondables($pdo, $stations){function getStatus($stations,$zoneInondable){
+    $cdhydro3 = $zoneInondable["cdhydro3"];
+    foreach ($stations as $station) {
+        if ($station["cdhydro3"] == $cdhydro3){
+            return $station["status"];
+        }
+    }
+}
+
+
+function getZonesInondables($pdo, $stations){
+    $stmt = $pdo->prepare('SELECT ST_AsGeoJSON(`zonesinondables`.`SPATIAL`),`zonesinondables`.`zone`,cellulevoronoi.cdhydro3
+          FROM `zonesinondables`
+            LEFT JOIN cellulevoronoi 
+              ON ST_Intersects(cellulevoronoi.SPATIAL, `zonesinondables`.`SPATIAL`)');
+    $stmt->execute();
+    $zonesInondablesWithoutStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $zonesInondables = Array();
+    foreach ($zonesInondablesWithoutStatus as &$zone) {
+        if ($status = getStatus($stations,$zone)) {
+            $zone['status']  = getStatus($stations,$zone);
+            $zonesInondables[] = $zone;
+        }
+    }
+
+    return $zonesInondables;
+}
+
+
 ?>
