@@ -1,4 +1,3 @@
-
 L.LineUtil.PolylineDecorator = {
     computeAngle: function(a, b) {
         return (Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI) + 90;
