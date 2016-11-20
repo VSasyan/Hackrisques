@@ -56,7 +56,8 @@ function generatePosAttribute($stations){
             "pos" => [floatval($row["longitude"]),floatval($row["latitude"])],
             "datetime" => $row['datetime'],
             "status" => $row['status'],
-            "hauteur" => floatval($row['hauteur'])
+            "hauteur" => floatval($row['hauteur']),
+            "cdhydro3" => $row['cdhydro3']
         );
     }
     return $stationsPos;
@@ -72,18 +73,24 @@ function getStations($pdo,$lat,$lon,$rayon){
 }
 
 
-function getZonesInondables($pdo, $stations){function getStatus($stations,$zoneInondable){
+function getStatus($stations,$zoneInondable){
     $cdhydro3 = $zoneInondable["cdhydro3"];
     foreach ($stations as $station) {
-        if ($station["cdhydro3"] == $cdhydro3){
+        if (array_key_exists("cdhydro3", $station) && $station["cdhydro3"] == $cdhydro3){
             return $station["status"];
         }
     }
 }
 
-
 function getZonesInondables($pdo, $stations){
-    $stmt = $pdo->prepare('SELECT ST_AsGeoJSON(`zonesinondables`.`SPATIAL`),`zonesinondables`.`zone`,cellulevoronoi.cdhydro3
+    $statusPerCD = array();
+    foreach ($stations as $station) {
+        if (array_key_exists('cdhydro3', $station) && array_key_exists('status', $station)) {
+            $statusPerCD[$station['cdhydro3']] = $station['status'];
+        }
+    }
+
+    $stmt = $pdo->prepare('SELECT ST_AsGeoJSON(`zonesinondables`.`SPATIAL`) AS geojson,`zonesinondables`.`zone`,cellulevoronoi.cdhydro3
           FROM `zonesinondables`
             LEFT JOIN cellulevoronoi 
               ON ST_Intersects(cellulevoronoi.SPATIAL, `zonesinondables`.`SPATIAL`)');
@@ -92,8 +99,8 @@ function getZonesInondables($pdo, $stations){
 
     $zonesInondables = Array();
     foreach ($zonesInondablesWithoutStatus as &$zone) {
-        if ($status = getStatus($stations,$zone)) {
-            $zone['status']  = getStatus($stations,$zone);
+        if (array_key_exists($zone['cdhydro3'], $statusPerCD)) {
+            $zone['status']  = $statusPerCD[$zone['cdhydro3']];
             $zonesInondables[] = $zone;
         }
     }
