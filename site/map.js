@@ -42,9 +42,6 @@ window.addEventListener("load", function load(event){
 		});
 	});
 
-	
-
-
 	/*var wmsLayer = L.tileLayer.wms('http://clc.developpement-durable.gouv.fr/geoserver/wms', {
 		layers: 'clc:RCLC12'
 	}).addTo(map);*/
@@ -120,7 +117,7 @@ function loadData() {
 }
 
 function getColorByStatus(status) {
-	if (status == 2) {return 'red';}
-	else if (status == 1) {return 'orange';}
+	if (status == 3) {return 'red';}
+	else if (status == 2) {return 'orange';}
 	return 'green';
 }
