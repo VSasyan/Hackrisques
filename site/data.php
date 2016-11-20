@@ -12,9 +12,12 @@
 		
 		$bdd = new PDO('mysql:host=localhost;dbname=hackrisques;charset=utf8', 'root', '');
 		
+		$stations = getStations($bdd,$y,$x,$rayon);
+
 		$data = array(
 			'orange' => getOrange($bdd),
-			'stations' => getStations($bdd,$y,$x,$rayon)
+			'stations' => $stations,
+			'zones' => getZonesInondables($bdd, $stations)
 		);
 
 		echo json_encode($data);

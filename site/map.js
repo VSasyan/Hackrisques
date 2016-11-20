@@ -2,9 +2,11 @@ var map, heat;
 var heat_on_map = false;
 var arrows_on_map = false;
 var stations_on_map = false;
+var zones_on_map = false;
 var arrows = [];
 var arrowHeads = [];
 var stations_markers = [];
+var zones = [];
 var lastZoomLevel = null;
 
 window.addEventListener("load", function load(event){
@@ -66,7 +68,7 @@ function loadData() {
 	var data = {
 		x : center3857[0],
 		y : center3857[1],
-		rayon : Math.sqrt(Math.pow(center3857[0] - ne3857[0], 2) + Math.pow(center3857[1] - ne3857[1], 2))
+		rayon : 3*Math.sqrt(Math.pow(center3857[0] - ne3857[0], 2) + Math.pow(center3857[1] - ne3857[1], 2))
 	};
 
 	$.ajax({
@@ -77,7 +79,7 @@ function loadData() {
 			var metresPerPixel = 40075016.686 * Math.abs(Math.cos(map.getCenter().lat / 180 * Math.PI)) / Math.pow(2, map.getZoom()+8);
 
 			// Ajout de la densité-orange :
-			if (heat_on_map) {heat.remove(map);}
+			/*if (heat_on_map) {heat.remove(map);}
 			heat = L.heatLayer(data.orange.gens, {radius: 35, max:0.8, blur: 50}).addTo(map);
 			heat_on_map = true;
 
@@ -96,7 +98,7 @@ function loadData() {
 						{offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: flux.nb_gens / metresPerPixel * 110, polygon: false, pathOptions: {stroke: true, color: 'black'}})}
 					]);
 				*/
-				var arrowOffset = 0;
+				/*var arrowOffset = 0;
 			    var anim = window.setInterval(function() {
 			        arrowHead.setPatterns([
 			            {offset: arrowOffset+'%',repeat: 10, symbol: L.Symbol.dash({pixelSize: 0, pathOptions: {color: '#000'}})}
@@ -121,7 +123,19 @@ function loadData() {
 				station_marker = L.circleMarker(pos, {size: Math.abs(station.hauteur), color: getColorByStatus(station.status)}).addTo(map);
 				stations_markers.push(station_marker);
 			});
-			stations_on_map = true;
+			stations_on_map = true;*/
+
+			//
+			if (zones_on_map) {
+				$.each(zones, function(i, z) {z.remove(map);});
+				zones = [];
+			}
+			$.each(data.zones, function(i, zone) {
+				var geojsonFeature = getGeojsonFeature(zone.geojson);
+				L.geoJSON(geojsonFeature, {color : getColorByStatus(zone.status)}).addTo(map);
+				zones.push(geojsonFeature);
+			});
+			zones_on_map = true;
 		}
 	});
 }
@@ -130,4 +144,27 @@ function getColorByStatus(status) {
 	if (status == 3) {return 'red';}
 	else if (status == 2) {return 'orange';}
 	return 'green';
+}
+
+function getGeojsonFeature(geojson, style) {
+	var geojson = JSON.parse(geojson);
+	var data = {"type" : geojson.type, "coordinates" : [[[]]]};
+var v = 0;
+	$.each(geojson.coordinates[0][0], function(i, element) {
+		var pos = proj4('EPSG:2154', 'EPSG:4326', element);
+		console.log(v++, pos)
+		//var pos = [pos[1], pos[0]];
+		data.coordinates[0][0].push(pos);
+	});
+
+	var geojsonFeature = {
+	    "type": "Feature",
+	    "style": style,
+	    "properties": {
+	        "name": "Zone inondable"
+	    },
+	    "geometry": data
+	};
+
+	return geojsonFeature;
 }
