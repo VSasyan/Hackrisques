@@ -7,13 +7,13 @@ import urllib2
 #Requete api nantes
 response = urllib2.urlopen('http://data.nantes.fr/api/getFluiditeAxesRoutiers/1.0/39W9VSNCSASEOGV')
 
-color_0 = "647800B4"
-color_1 = "64828282"
-color_2 = "64FFFFFF"
-color_3 = "64147800"
-color_4 = "6414F0FF"
-color_5 = "6414B4FF"
-color_6 = "641400FF"
+color_0 = "ff7800B4"
+color_1 = "ff828282"
+color_2 = "ffFFFFFF"
+color_3 = "ff147800"
+color_4 = "ff14F0FF"
+color_5 = "ff14B4FF"
+color_6 = "ff1400FF"
 
 file = open("newfile.kml", "w")
 
