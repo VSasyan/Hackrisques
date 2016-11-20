@@ -14,7 +14,7 @@
 		
 		$data = array(
 			'orange' => getOrange($bdd),
-			'stations' => getStations($bdd,$x,$y,$rayon)
+			'stations' => getStations($bdd,$y,$x,$rayon)
 		);
 
 		echo json_encode($data);

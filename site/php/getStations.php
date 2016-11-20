@@ -56,7 +56,7 @@ function generatePosAttribute($stations){
             "pos" => [floatval($row["longitude"]),floatval($row["latitude"])],
             "datetime" => $row['datetime'],
             "status" => $row['status'],
-            "hauteur" => $row['hauteur']
+            "hauteur" => floatval($row['hauteur'])
         );
     }
     return $stationsPos;
