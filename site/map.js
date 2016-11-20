@@ -63,8 +63,6 @@ function loadData() {
 	var center3857 = proj4('EPSG:4326', 'EPSG:2154', [center.lng, center.lat]);
 	var ne3857 = proj4('EPSG:4326', 'EPSG:2154', [ne.lng, ne.lat]);
 
-	console.log(center)
-
 	var data = {
 		x : center3857[0],
 		y : center3857[1],
@@ -79,26 +77,26 @@ function loadData() {
 			var metresPerPixel = 40075016.686 * Math.abs(Math.cos(map.getCenter().lat / 180 * Math.PI)) / Math.pow(2, map.getZoom()+8);
 
 			// Ajout de la densité-orange :
-			/*if (heat_on_map) {heat.remove(map);}
-			heat = L.heatLayer(data.orange.gens, {radius: 35, max:0.8, blur: 50}).addTo(map);
+			//if (heat_on_map) {heat.remove(map);}
+			heat = L.heatLayer(data.orange.gens, {radius: 35, max:0.8, blur: 50});//.addTo(map);
 			heat_on_map = true;
 
 			// Ajout des flux-orange :
 			if (arrows_on_map) {
-				$.each(arrows, function(i, arrow) {arrow.remove(map);});
-				$.each(arrowHeads, function(i, arrowHead) {arrowHead.remove(map);});
+				//$.each(arrows, function(i, arrow) {arrow.remove(map);});
+				//$.each(arrowHeads, function(i, arrowHead) {arrowHead.remove(map);});
 				arrows = [];
 				arrowHeads = [];	
 			}			
 			$.each(data.orange.flux, function(i, flux) {
-				var arrow = L.polyline([flux.from, flux.to], {color: "#ff7800", weight: 1}).addTo(map);
+				var arrow = L.polyline([flux.from, flux.to], {color: "#ff7800", weight: 1});
 
-				var arrowHead = L.polylineDecorator(arrow).addTo(map);
+				var arrowHead = L.polylineDecorator(arrow);
 				/*arrowHead.setPatterns([
 						{offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: flux.nb_gens / metresPerPixel * 110, polygon: false, pathOptions: {stroke: true, color: 'black'}})}
 					]);
 				*/
-				/*var arrowOffset = 0;
+				var arrowOffset = 0;
 			    var anim = window.setInterval(function() {
 			        arrowHead.setPatterns([
 			            {offset: arrowOffset+'%',repeat: 10, symbol: L.Symbol.dash({pixelSize: 0, pathOptions: {color: '#000'}})}
@@ -113,29 +111,64 @@ function loadData() {
 
 			// Ajout du niveau des stations :
 			if (stations_on_map) {
-				$.each(stations_markers, function(i, sm) {sm.remove(map);});
+				//$.each(stations_markers, function(i, sm) {sm.remove(map);});
 				stations_markers = [];
 			}
 			$.each(data.stations, function(i, station) {
-				console.log(proj4('EPSG:2154', 'EPSG:4326', station.pos), station.pos)
 				var pos = proj4('EPSG:2154', 'EPSG:4326', station.pos);
 				var pos = [pos[1], pos[0]];
-				station_marker = L.circleMarker(pos, {size: Math.abs(station.hauteur), color: getColorByStatus(station.status)}).addTo(map);
+				station_marker = L.circleMarker(pos, {size: Math.abs(station.hauteur), color: getColorByStatus(station.status)});
 				stations_markers.push(station_marker);
 			});
-			stations_on_map = true;*/
+			stations_on_map = true;
 
-			//
+			// Ajout des zones inondables :
 			if (zones_on_map) {
-				$.each(zones, function(i, z) {z.remove(map);});
+				//$.each(zones, function(i, z) {z.remove(map);});
 				zones = [];
 			}
 			$.each(data.zones, function(i, zone) {
 				var geojsonFeature = getGeojsonFeature(zone.geojson);
-				L.geoJSON(geojsonFeature, {color : getColorByStatus(zone.status)}).addTo(map);
-				zones.push(geojsonFeature);
+				var geo = L.geoJSON(geojsonFeature, {color : getColorByStatus(zone.status)});
+				zones.push(geo);
 			});
 			zones_on_map = true;
+
+			// Création des groupes :
+			var pop_en_danger_array = [];
+			$.each(zones, function(i,pop) {pop_en_danger_array.push(pop);});
+			pop_en_danger_array.push(heat);
+			var pop_en_danger = L.layerGroup(pop_en_danger_array);
+
+			var evol_situation_array = [];
+			$.each(stations_markers, function(i,sm) {evol_situation_array.push(sm);});
+			$.each(arrows, function(i,arrow) {evol_situation_array.push(arrow);});
+			$.each(arrowHeads, function(i,arrowHead) {evol_situation_array.push(arrowHead);});
+			var evol_situation = L.layerGroup(evol_situation_array);
+
+			var toutes_donnees_array = [];
+			$.each(zones, function(i,pop) {toutes_donnees_array.push(pop);});
+			toutes_donnees_array.push(heat);
+			$.each(stations_markers, function(i,sm) {toutes_donnees_array.push(sm);});
+			$.each(arrows, function(i,arrow) {toutes_donnees_array.push(arrow);});
+			$.each(arrowHeads, function(i,arrowHead) {toutes_donnees_array.push(arrowHead);});
+
+			var toutes_donnees = L.layerGroup(toutes_donnees_array);
+			
+			//pop_en_danger.addTo(map);
+			//evol_situation.addTo(map);
+			toutes_donnees.addTo(map);
+
+			var baseMaps = {
+				"Danger population": pop_en_danger,
+				"Situation": evol_situation,
+				"Vue d'ensemble": toutes_donnees
+			};
+			L.control.layers(baseMaps, {}).addTo(map);
+
+			/*var overlayMaps = {
+				"Cities": cities
+			};*/
 		}
 	});
 }
@@ -149,10 +182,9 @@ function getColorByStatus(status) {
 function getGeojsonFeature(geojson, style) {
 	var geojson = JSON.parse(geojson);
 	var data = {"type" : geojson.type, "coordinates" : [[[]]]};
-var v = 0;
+
 	$.each(geojson.coordinates[0][0], function(i, element) {
 		var pos = proj4('EPSG:2154', 'EPSG:4326', element);
-		console.log(v++, pos)
 		//var pos = [pos[1], pos[0]];
 		data.coordinates[0][0].push(pos);
 	});
