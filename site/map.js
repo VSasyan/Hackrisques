@@ -37,7 +37,7 @@ window.addEventListener("load", function load(event){
 		$.each(arrowHeads, function(i, arrowHead) {
 			var size = arrowHeads[0].options.patterns[0].symbol.options.pixelSize;
 			arrowHead.setPatterns([
-				{offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: size / zoomFactor, polygon: false, pathOptions: {stroke: true}})}
+				{offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: size / zoomFactor, polygon: false, pathOptions: {stroke: true, color: 'black'}})}
 			]);
 		});
 	});
@@ -78,7 +78,7 @@ function loadData() {
 
 			// Ajout de la densité-orange :
 			if (heat_on_map) {heat.remove(map);}
-			heat = L.heatLayer(data.orange.gens, {radius: 25, max:0.8}).addTo(map);
+			heat = L.heatLayer(data.orange.gens, {radius: 35, max:0.8, blur: 50}).addTo(map);
 			heat_on_map = true;
 
 			// Ajout des flux-orange :
@@ -89,10 +89,10 @@ function loadData() {
 				arrowHeads = [];	
 			}			
 			$.each(data.orange.flux, function(i, flux) {
-				var arrow = L.polyline([flux.from, flux.to], {}).addTo(map);
+				var arrow = L.polyline([flux.from, flux.to], {color: 'black'}).addTo(map);
 				var arrowHead = L.polylineDecorator(arrow).addTo(map);
 				arrowHead.setPatterns([
-						{offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: flux.nb_gens / metresPerPixel * 110, polygon: false, pathOptions: {stroke: true}})}
+						{offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: flux.nb_gens / metresPerPixel * 110, polygon: false, pathOptions: {stroke: true, color: 'black'}})}
 					]);
 				arrows.push(arrow);
 				arrowHeads.push(arrowHead);				
