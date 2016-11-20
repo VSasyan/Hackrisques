@@ -40,10 +40,16 @@ function generateStatus($stations,$borneMin,$borneMax){
 
 
 function generatePosAttribute($stations){
-    foreach ($stations as &$row) {
-        $row["pos"] = [floatval($row["longitude"]),floatval($row["latitude"])];
+    $stationsPos = array();
+    foreach ($stations as $row) {
+        $stationsPos[] = array(
+            "pos" = [floatval($row["longitude"]),floatval($row["latitude"])],
+            "datetime" = $row['datetime'],
+            "status" = $row['status'],
+            "hauteur" = $row['hauteur']
+        );
     }
-    return $stations;
+    return $stationsPos;
 }
 
 
