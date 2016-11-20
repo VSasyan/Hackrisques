@@ -73,10 +73,10 @@ function getZonesInondables($pdo, $stations){function getStatus($stations,$zoneI
 
 
 function getZonesInondables($pdo, $stations){
-    $stmt = $pdo->prepare('SELECT ST_AsGeoJSON(`table 1`.`SPATIAL`),`table 1`.`zone`,cellulevoronoi.cdhydro3
-          FROM `table 1`
+    $stmt = $pdo->prepare('SELECT ST_AsGeoJSON(`zonesinondables`.`SPATIAL`),`zonesinondables`.`zone`,cellulevoronoi.cdhydro3
+          FROM `zonesinondables`
             LEFT JOIN cellulevoronoi 
-              ON ST_Intersects(cellulevoronoi.SPATIAL, `table 1`.`SPATIAL`)');
+              ON ST_Intersects(cellulevoronoi.SPATIAL, `zonesinondables`.`SPATIAL`)');
     $stmt->execute();
     $zonesInondablesWithoutStatus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
