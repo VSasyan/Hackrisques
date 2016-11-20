@@ -50,6 +50,10 @@ window.addEventListener("load", function load(event){
 
 	//console.log("Carte d'occupation des sols chargée");
 
+	var kmlLayer = new L.KML("routes/routes.kml", {async: true, opacity:1});
+	map.addLayer(kmlLayer, {opacity:1});
+
+
 	loadData();
 
 },false);
@@ -70,7 +74,7 @@ function loadData() {
 	};
 
 	$.ajax({
-		url : 'data.php?x=' + data.x + '&y=' + data.y + '&rayon=' + data.rayon,
+		url : '/data.php?x=' + data.x + '&y=' + data.y + '&rayon=' + data.rayon,
 		type : 'GET',
 		success : function(json) {
 			var data = JSON.parse(json);
@@ -158,17 +162,22 @@ function loadData() {
 			//pop_en_danger.addTo(map);
 			//evol_situation.addTo(map);
 			toutes_donnees.addTo(map);
+			routes.addTo(map);
+
+			var kmlLayer = new L.KML("routes/routes.kml", {async: true, opacity:1});
+			//map.addLayer(kmlLayer, {opacity:1});
+			var routes = L.layerGroup([kmlLayer]);
 
 			var baseMaps = {
 				"Danger population": pop_en_danger,
 				"Situation": evol_situation,
 				"Vue d'ensemble": toutes_donnees
 			};
-			L.control.layers(baseMaps, {}).addTo(map);
+			L.control.layers(baseMaps, overlayMaps, {position: 'bottomright'}).addTo(map);
 
-			/*var overlayMaps = {
-				"Cities": cities
-			};*/
+			var overlayMaps = {
+				"Info traffic": routes
+			};
 		}
 	});
 }
