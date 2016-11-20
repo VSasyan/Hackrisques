@@ -14,9 +14,19 @@ function getDataObs($cdhydro3) {
     
 function getStationswithoutWaterInformation($pdo,$lat,$lon,$rayon){
     $condition = '(latitude-'.$lat.')*(latitude-'.$lat.')+(longitude-'.$lon.')*(longitude-'.$lon.')<='.($rayon*$rayon);
-    $stmt = $pdo->prepare('SELECT * FROM stationVigicrues WHERE '.$condition);
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $reponse = $pdo->query('SELECT * FROM stationvigicrues WHERE '.$condition);
+    $result = array();
+    while ($ligne = $reponse->fetch()) {
+        $result[] = array(
+            'idStationVigicrues' => $ligne['idStationVigicrues'],
+            'latitude' => $ligne['latitude'],
+            'longitude' => $ligne['longitude'],
+            'cdhydro3' => $ligne['cdhydro3']
+        );
+    }
+    //$stmt = $pdo->prepare('SELECT * FROM stationVigicrues WHERE '.$condition);
+    //$stmt->execute();
+    //$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $result;
 }
 
@@ -43,10 +53,10 @@ function generatePosAttribute($stations){
     $stationsPos = array();
     foreach ($stations as $row) {
         $stationsPos[] = array(
-            "pos" = [floatval($row["longitude"]),floatval($row["latitude"])],
-            "datetime" = $row['datetime'],
-            "status" = $row['status'],
-            "hauteur" = $row['hauteur']
+            "pos" => [floatval($row["longitude"]),floatval($row["latitude"])],
+            "datetime" => $row['datetime'],
+            "status" => $row['status'],
+            "hauteur" => $row['hauteur']
         );
     }
     return $stationsPos;

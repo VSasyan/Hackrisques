@@ -4,7 +4,7 @@
 		$orange = array();
 		$orange = array('gens' => array(), 'flux' => array());
 
-		$reponse = $bdd->query('SELECT lat, lon, gens.nb_gens as nb_gens, gens.datetime as datetime FROM `antenne` INNER JOIN gens ON gens.id_antenne = id_orange WHERE gens.datetime BETWEEN timestamp(DATE_SUB(now(), INTERVAL 11 MINUTE)) AND timestamp(NOW())');
+		$reponse = $bdd->query('SELECT lat, lon, gens.nb_gens as nb_gens, gens.datetime as datetime FROM `antenne` INNER JOIN gens ON gens.id_antenne = id_orange WHERE gens.datetime = (SELECT max(datetime) FROM gens)');
 
 		while ($ligne = $reponse->fetch()) {
 			/*if (!array_key_exists($ligne['datetime'], $orange)) {
@@ -20,7 +20,7 @@
 			$orange['gens'][] = array(floatval($ligne['lon']), floatval($ligne['lat']), intval($ligne['nb_gens']));
 		}
 
-		$reponse = $bdd->query('SELECT origine.id_orange as origine_id, origine.lat as origine_lat, origine.lon as origine_lon, desti.id_orange as desti_id, desti.lat as desti_lat, desti.lon as desti_lon, flux.nb_gens as nb_gens, flux.datetime as datetime FROM `flux` INNER JOIN antenne AS origine ON flux.from_antenne = origine.id_orange INNER JOIN antenne AS desti ON flux.to_antenne = desti.id_orange WHERE flux.datetime BETWEEN timestamp(DATE_SUB(now(), INTERVAL 11 MINUTE)) AND timestamp(NOW()) AND nb_gens ORDER BY origine_id, desti_id');
+		$reponse = $bdd->query('SELECT origine.id_orange as origine_id, origine.lat as origine_lat, origine.lon as origine_lon, desti.id_orange as desti_id, desti.lat as desti_lat, desti.lon as desti_lon, flux.nb_gens as nb_gens, flux.datetime as datetime FROM `flux` INNER JOIN antenne AS origine ON flux.from_antenne = origine.id_orange INNER JOIN antenne AS desti ON flux.to_antenne = desti.id_orange WHERE flux.datetime = (SELECT max(datetime) FROM flux) ORDER BY origine_id, desti_id');
 
 		$temp = array();
 		while ($ligne = $reponse->fetch()) {
