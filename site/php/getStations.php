@@ -72,7 +72,7 @@ function getStations($pdo,$lat,$lon,$rayon){
 }
 
 
-function getZonesInondables($pdo, $stations){function getStatus($stations,$zoneInondable){
+function getStatus($stations,$zoneInondable){
     $cdhydro3 = $zoneInondable["cdhydro3"];
     foreach ($stations as $station) {
         if ($station["cdhydro3"] == $cdhydro3){

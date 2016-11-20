@@ -89,11 +89,21 @@ function loadData() {
 				arrowHeads = [];	
 			}			
 			$.each(data.orange.flux, function(i, flux) {
-				var arrow = L.polyline([flux.from, flux.to], {color: 'black'}).addTo(map);
+				var arrow = L.polyline([flux.from, flux.to], {color: "#ff7800", weight: 1}).addTo(map);
+
 				var arrowHead = L.polylineDecorator(arrow).addTo(map);
-				arrowHead.setPatterns([
+				/*arrowHead.setPatterns([
 						{offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: flux.nb_gens / metresPerPixel * 110, polygon: false, pathOptions: {stroke: true, color: 'black'}})}
 					]);
+				*/
+				var arrowOffset = 0;
+			    var anim = window.setInterval(function() {
+			        arrowHead.setPatterns([
+			            {offset: arrowOffset+'%',repeat: 10, symbol: L.Symbol.dash({pixelSize: 0, pathOptions: {color: '#000'}})}
+			            ])
+			        if(++arrowOffset >= 10)
+			            arrowOffset = 0;
+			    }, 100);
 				arrows.push(arrow);
 				arrowHeads.push(arrowHead);				
 			});
